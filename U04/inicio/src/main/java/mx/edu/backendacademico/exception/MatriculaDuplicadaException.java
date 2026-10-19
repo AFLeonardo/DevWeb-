@@ -1,4 +1,4 @@
-package mx.edu.backendacademico.exeption;
+package mx.edu.backendacademico.exception;
 
 public class MatriculaDuplicadaException {
     public MatriculaDuplicadaException(String matricula) {
