@@ -4,6 +4,7 @@ package mx.edu.backendacademico.controller;
 
 import java.net.URI;
 import java.util.List;
+import mx.edu.backendacademico.domain.EstatusAlumno;
 import mx.edu.backendacademico.dto.ActualizarAlumnoRequest;
 import mx.edu.backendacademico.dto.AlumnoMapper;
 import mx.edu.backendacademico.dto.AlumnoResponse;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,21 +25,40 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/alumnos")
 public class AlumnoController {
     private final AlumnoService service;
-    public AlumnoController(AlumnoService service) { this.service = service; }
 
-    // GET consulta sin solicitar cambios de estado de negocio.
+    public AlumnoController(AlumnoService service) {
+        this.service = service;
+    }
+
+    // GET unificado: maneja tanto la petición sin filtro como con filtro opcional de estatus
     @GetMapping
-    public List<AlumnoResponse> listar() { return service.listar().stream().map(AlumnoMapper::toResponse).toList(); }
+    public ResponseEntity<List<AlumnoResponse>> listar(
+            @RequestParam(required = false) String estatus) {
 
-    // GET consulta sin solicitar cambios de estado de negocio.
+        EstatusAlumno estatusEnum = null;
+        if (estatus != null && !estatus.trim().isEmpty()) {
+            estatusEnum = EstatusAlumno.valueOf(estatus.toUpperCase());
+        }
+
+        List<AlumnoResponse> alumnos = service.listar(estatusEnum).stream()
+                .map(AlumnoMapper::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(alumnos);
+    }
+
+    // GET consulta por ID
     @GetMapping("/{id}")
-    public AlumnoResponse buscar(@PathVariable Long id) { return AlumnoMapper.toResponse(service.buscar(id)); }
+    public AlumnoResponse buscar(@PathVariable Long id) {
+        return AlumnoMapper.toResponse(service.buscar(id));
+    }
 
     // El servicio asigna identidad; ResponseEntity publica 201 y Location.
     @PostMapping
     public ResponseEntity<AlumnoResponse> crear(@RequestBody CrearAlumnoRequest request) {
         var creado = service.crear(request.matricula(), request.nombre(), request.correo());
-        return ResponseEntity.created(URI.create("/api/v1/alumnos/" + creado.id())).body(AlumnoMapper.toResponse(creado));
+        return ResponseEntity.created(URI.create("/api/v1/alumnos/" + creado.id()))
+                .body(AlumnoMapper.toResponse(creado));
     }
 
     // PUT sustituye todos los campos de la representación editable.
