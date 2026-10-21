@@ -4,10 +4,16 @@
 POST {{baseUrl}}/alumnos
 Content-Type: application/json
 
-{"matricula":"A001","nombre":"Ada Lovelace","correo":"ada@universidad.mx"}
+{"matricula":"A002","nombre":"Ethan Lovelace","correo":"ethan@universidad.mx"}
 
-### Listar alumnos
+### Listar alumnos sin filtro
 GET {{baseUrl}}/alumnos
+
+### Listar alumnos con status ACTIVO
+GET {{baseUrl}}/alumnos?estatus=ACTIVO
+
+### Listar alumnos con estatus BAJA
+GET {{baseUrl}}/alumnos?estatus=BAJA
 
 ### Consultar alumno
 GET {{baseUrl}}/alumnos/1
