@@ -18,9 +18,20 @@ public class AlumnoService {
         this.repository = repository;
     }
 
-    public List<Alumno> listar() {
-        // Devuelve una instantánea de los alumnos desde el adaptador activo.
-        return repository.buscarTodos();
+    public List<Alumno> listar(EstatusAlumno estatus) {
+        // 1. Obtiene la lista del repositorio (operación de solo lectura, no modifica el almacén)
+        List<Alumno> alumnosBD = repository.buscarTodos();
+
+        // 2. Si no se envía el filtro (es null), se conserva el contrato original devolviendo toda la lista
+        if (estatus == null) {
+            return alumnosBD.stream()
+                    .toList(); // O .collect(Collectors.toList()) si usas Java < 16
+        }
+
+        // 3. Aplica el filtro con Java Stream sobre la lista en memoria
+        return alumnosBD.stream()
+                .filter(alumno -> alumno.estatus() == estatus)
+                .toList();
     }
 
     public Alumno buscar(Long id) {
