@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="KubernetesApiProvider">{}</component>
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/U01/inicio/pom.xml" />
+        <option value="$PROJECT_DIR$/U02/inicio/pom.xml" />
+        <option value="$PROJECT_DIR$/U03/pom.xml" />
+        <option value="$PROJECT_DIR$/U04/inicio/pom.xml" />
+        <option value="$PROJECT_DIR$/U05/inicio/pom.xml" />
+        <option value="$PROJECT_DIR$/U06/inicio/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_25" default="true" project-jdk-name="ms-25" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>
