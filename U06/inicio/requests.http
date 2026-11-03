@@ -26,9 +26,23 @@ Content-Type: application/json
 
 {"matricula":"","nombre":"A","correo":"no-es-correo"}
 
-### Matrícula duplicada: ejecutar dos veces para obtener 409
+### JSON incompleto: 400 al leer el mensaje
 POST {{baseUrl}}/alumnos
 Content-Type: application/json
 
-{"matricula":"A001","nombre":"Otra persona","correo":"otra@universidad.mx"}
-{"matricula":"A001","nombre":"Otra persona","correo":"otra@universidad.mx"}
+{"matricula":
+
+### ID inexistente: 404
+GET {{baseUrl}}/alumnos/9223372036854775807
+
+### Matrícula duplicada: primera petición (201); reinicia la aplicación antes de repetir
+POST {{baseUrl}}/alumnos
+Content-Type: application/json
+
+{"matricula":"DUP-PRUEBA","nombre":"Otra persona","correo":"otra@universidad.mx"}
+
+### Matrícula duplicada: segunda petición (409); usa la misma matrícula de la primera
+POST {{baseUrl}}/alumnos
+Content-Type: application/json
+
+{"matricula":"DUP-PRUEBA","nombre":"Otra persona","correo":"otra@universidad.mx"}
