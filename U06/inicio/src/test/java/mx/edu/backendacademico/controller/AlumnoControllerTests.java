@@ -38,6 +38,19 @@ class AlumnoControllerTests {
     }
 
     @Test
+    void rechazaMatriculaConEspaciosInternosEnLaFronteraHttp() throws Exception {
+        mockMvc.perform(post(ALUMNOS)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"matricula":"A 001","nombre":"Ada Lovelace","correo":"ada@universidad.mx"}
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.codigo").value("DATOS_INVALIDOS"))
+                .andExpect(jsonPath("$.campos", hasSize(1)))
+                .andExpect(jsonPath("$.campos[0].campo").value("matricula"));
+    }
+
+    @Test
     void respondeBadRequestCuandoNoPuedeLeerElJson() throws Exception {
         mockMvc.perform(post(ALUMNOS)
                         .contentType(MediaType.APPLICATION_JSON)
