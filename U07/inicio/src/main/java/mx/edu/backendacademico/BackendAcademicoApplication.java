@@ -1,14 +1,14 @@
 package mx.edu.backendacademico;
 
-// Inicia el contexto de Spring y el servidor embebido a partir del paquete raíz.
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
-public class BackendAcademicoApplication {
-    public static void main(String[] args) {
-        // La JVM delega el ensamblado del contexto y del servidor a Spring.
-        SpringApplication.run(BackendAcademicoApplication.class, args);
-    }
+@SpringBootTest(properties = {
+    "spring.datasource.url=jdbc:h2:mem:contexto;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
+    "spring.datasource.username=sa", "spring.datasource.password=",
+    "spring.flyway.enabled=false", "spring.jpa.hibernate.ddl-auto=create-drop"
+})
+class BackendAcademicoApplicationTests {
+    // Comprueba ensamblado y mapeo JPA. PostgreSQL y migraciones se prueban en U09.
+    @Test void cargaElContextoConBaseEfimera() { }
 }
