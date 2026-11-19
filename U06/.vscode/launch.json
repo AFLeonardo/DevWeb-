@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-BackendAcademicoApplication<backend-academico>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "mx.edu.backendacademico.BackendAcademicoApplication",
+            "projectName": "backend-academico",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
