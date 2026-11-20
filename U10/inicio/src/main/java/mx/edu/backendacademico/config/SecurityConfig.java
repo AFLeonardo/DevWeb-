@@ -22,6 +22,8 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/v1/saludo", "/openapi.yaml", "/error").permitAll()
             .requestMatchers("/api/v1/csrf").authenticated()
+            // La URL sólo exige identidad; la regla por objeto vive en ExpedienteService.
+            .requestMatchers(HttpMethod.GET, "/api/v1/expedientes/**").authenticated()
             .requestMatchers(HttpMethod.GET, "/api/v1/alumnos/**").hasAnyRole("ALUMNO", "DOCENTE", "ADMIN")
             .requestMatchers("/api/v1/**").hasAnyRole("DOCENTE", "ADMIN")
             .anyRequest().denyAll());
@@ -40,6 +42,7 @@ public class SecurityConfig {
         // Cuentas públicas de laboratorio; no contienen credenciales reales.
         return new InMemoryUserDetailsManager(
             User.withUsername("alumno").password(encoder.encode("alumno123")).roles("ALUMNO").build(),
+            User.withUsername("alumno2").password(encoder.encode("alumno2123")).roles("ALUMNO").build(),
             User.withUsername("docente").password(encoder.encode("docente123")).roles("DOCENTE").build(),
             User.withUsername("admin").password(encoder.encode("admin123")).roles("ADMIN").build());
     }

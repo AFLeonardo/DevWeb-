@@ -20,6 +20,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problema(HttpStatus.NOT_FOUND, "ALUMNO_NO_ENCONTRADO", ex.getMessage());
     }
 
+    @ExceptionHandler(ExpedienteNoVinculadoException.class)
+    ProblemDetail sinExpediente(ExpedienteNoVinculadoException ex) {
+        return problema(HttpStatus.NOT_FOUND, "EXPEDIENTE_NO_VINCULADO", ex.getMessage());
+    }
+
+    @ExceptionHandler(ExpedienteAjenoException.class)
+    ProblemDetail ajeno(ExpedienteAjenoException ex) {
+        // 403 generado en MVC: sí lleva ProblemDetail, a diferencia de los 403 de filtros.
+        return problema(HttpStatus.FORBIDDEN, "EXPEDIENTE_AJENO", ex.getMessage());
+    }
+
     @ExceptionHandler(MatriculaDuplicadaException.class)
     ProblemDetail conflicto(MatriculaDuplicadaException ex) {
         return problema(HttpStatus.CONFLICT, "MATRICULA_DUPLICADA", ex.getMessage());

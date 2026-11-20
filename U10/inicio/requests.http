@@ -42,3 +42,18 @@ Authorization: Basic docente docente123
 DELETE http://localhost:8080/api/v1/alumnos/2
 Authorization: Basic docente docente123
 X-CSRF-TOKEN: {{csrf}}
+### Mi expediente: la identidad sale de la cuenta autenticada (vinculada a A001)
+GET http://localhost:8080/api/v1/expedientes/mio
+Authorization: Basic alumno alumno123
+
+### Intento de suplantación: los parámetros se ignoran; responde A001
+GET http://localhost:8080/api/v1/expedientes/mio?usuario=alumno2&matricula=A002
+Authorization: Basic alumno alumno123
+
+### Usuario ajeno: alumno2 (A002) pide el expediente de A001 con su id real → 403 EXPEDIENTE_AJENO
+GET http://localhost:8080/api/v1/expedientes/1
+Authorization: Basic alumno2 alumno2123
+
+### Administrador: cualquier expediente, sustituye el id real
+GET http://localhost:8080/api/v1/expedientes/1
+Authorization: Basic admin admin123
