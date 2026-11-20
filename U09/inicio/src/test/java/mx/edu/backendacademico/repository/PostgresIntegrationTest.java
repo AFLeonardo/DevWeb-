@@ -6,8 +6,10 @@ import mx.edu.backendacademico.exception.OperacionAcademicaException;
 import mx.edu.backendacademico.repository.jpa.*;
 import mx.edu.backendacademico.service.InscripcionService;
 import org.junit.jupiter.api.Test;
+import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -32,6 +34,19 @@ class PostgresIntegrationTest {
     @Autowired MateriaRepository materias;
     @Autowired InscripcionRepository inscripciones;
     @Autowired InscripcionService servicio;
+
+    @Test void postgresRechazaMatriculaDuplicadaConRestriccionUnica() {
+        alumnos.saveAndFlush(new AlumnoEntity(
+            new Alumno(null, "DUP-1", "Ada", "ada@u.mx", EstatusAlumno.ACTIVO)));
+
+        var error = assertThrows(DataIntegrityViolationException.class, () ->
+            alumnos.saveAndFlush(new AlumnoEntity(
+                new Alumno(null, "DUP-1", "Emmy", "emmy@u.mx", EstatusAlumno.ACTIVO))));
+
+        var violacion = assertInstanceOf(PSQLException.class, error.getMostSpecificCause());
+        assertEquals("23505", violacion.getSQLState());
+        assertEquals("uk_alumnos_matricula", violacion.getServerErrorMessage().getConstraint());
+    }
 
     @Test void noSobrepasaElCupoNiRepiteUnaInscripcion() {
         var a = alumnos.saveAndFlush(new AlumnoEntity(new Alumno(null, "P1", "Ada", "ada@u.mx", EstatusAlumno.ACTIVO)));
