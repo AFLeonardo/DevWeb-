@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import java.util.List;
 import mx.edu.backendacademico.domain.*;
+import mx.edu.backendacademico.service.AlumnoIdempotenteService;
 import mx.edu.backendacademico.service.AlumnoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 class AlumnoControllerTest {
     @Autowired MockMvc mvc;
     @MockitoBean AlumnoService service;
+    @MockitoBean AlumnoIdempotenteService idempotente;
     @Test void listarDevuelveJson() throws Exception {
         when(service.listar()).thenReturn(List.of(new Alumno(1L,"A1","Ada","ada@u.mx",EstatusAlumno.ACTIVO)));
         mvc.perform(get("/api/v1/alumnos")).andExpect(status().isOk()).andExpect(jsonPath("$[0].matricula").value("A1"));

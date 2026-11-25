@@ -47,9 +47,13 @@ paths:
         '403': {$ref: '#/components/responses/Prohibido'}
     post:
       summary: Crea un alumno
-      description: Requiere DOCENTE o ADMIN y un token CSRF de la misma sesión.
+      description: >-
+        Requiere DOCENTE o ADMIN y un token CSRF de la misma sesión. Con Idempotency-Key,
+        repetir la solicitud con el mismo contenido devuelve el mismo alumno sin crear otro;
+        reutilizar la clave con contenido distinto produce 409 CLAVE_IDEMPOTENCIA_REUTILIZADA.
       parameters:
         - {$ref: '#/components/parameters/Csrf'}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
       requestBody:
         required: true
         content:
@@ -57,7 +61,7 @@ paths:
             schema: {$ref: '#/components/schemas/CrearAlumno'}
       responses:
         '201':
-          description: Alumno creado
+          description: Alumno creado, o el mismo alumno si es una repetición con la misma Idempotency-Key
           headers:
             Location:
               description: URI de consulta del alumno creado
@@ -68,7 +72,7 @@ paths:
         '400': {$ref: '#/components/responses/Problema'}
         '401': {$ref: '#/components/responses/NoAutenticado'}
         '403': {$ref: '#/components/responses/Prohibido'}
-        '409': {$ref: '#/components/responses/Problema'}
+        '409': {$ref: '#/components/responses/ConflictoCreacion'}
   /api/v1/alumnos/{id}:
     parameters:
       - name: id
@@ -202,6 +206,14 @@ components:
       required: true
       description: Token obtenido de /api/v1/csrf con la misma cookie de sesión
       schema: {type: string}
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: >-
+        Clave elegida por el cliente (por ejemplo un UUID) para reintentar con seguridad.
+        Es única por usuario autenticado; se asocia a la huella SHA-256 de matrícula, nombre y correo.
+      schema: {type: string, minLength: 1, maxLength: 100}
   responses:
     NoAutenticado:
       description: Falta autenticación válida; con token CSRF ausente una escritura puede ser rechazada antes con 403
@@ -212,6 +224,22 @@ components:
       content:
         application/problem+json:
           schema: {$ref: '#/components/schemas/Problema'}
+    ConflictoCreacion:
+      description: >-
+        MATRICULA_DUPLICADA si la matrícula ya existe, o CLAVE_IDEMPOTENCIA_REUTILIZADA si la
+        Idempotency-Key ya se usó con otro contenido; en ambos casos no se crea ningún alumno.
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problema'}
+          examples:
+            claveReutilizada:
+              value:
+                type: urn:backend-academico:problema:CLAVE_IDEMPOTENCIA_REUTILIZADA
+                title: Conflict
+                status: 409
+                detail: La clave de idempotencia ya se usó con un contenido distinto
+                instance: /api/v1/alumnos
+                codigo: CLAVE_IDEMPOTENCIA_REUTILIZADA
   schemas:
     CrearAlumno:
       type: object

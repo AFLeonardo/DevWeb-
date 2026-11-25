@@ -54,6 +54,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return inesperado(ex);
     }
 
+    @ExceptionHandler(ClaveIdempotenciaException.class)
+    ProblemDetail idempotencia(ClaveIdempotenciaException ex) {
+        var status = ClaveIdempotenciaException.INVALIDA.equals(ex.getCodigo())
+            ? HttpStatus.BAD_REQUEST : HttpStatus.CONFLICT;
+        return problema(status, ex.getCodigo(), ex.getMessage());
+    }
+
     @ExceptionHandler(OperacionAcademicaException.class)
     ProblemDetail academica(OperacionAcademicaException ex) {
         var status = ex.getCodigo().equals("MATERIA_NO_ENCONTRADA")

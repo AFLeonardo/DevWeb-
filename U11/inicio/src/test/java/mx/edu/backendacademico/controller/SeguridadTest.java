@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import mx.edu.backendacademico.config.SecurityConfig;
 import mx.edu.backendacademico.domain.*;
+import mx.edu.backendacademico.service.AlumnoIdempotenteService;
 import mx.edu.backendacademico.service.AlumnoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 class SeguridadTest {
     @Autowired MockMvc mvc;
     @MockitoBean AlumnoService service;
+    @MockitoBean AlumnoIdempotenteService idempotente;
     private static final String DATOS = """
         {"matricula":"S1","nombre":"Ada","correo":"ada@u.mx"}
         """;
