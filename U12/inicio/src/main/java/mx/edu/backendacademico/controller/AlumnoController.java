@@ -6,11 +6,16 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import mx.edu.backendacademico.dto.ActualizarAlumnoRequest;
+import mx.edu.backendacademico.domain.Alumno;
 import mx.edu.backendacademico.dto.AlumnoMapper;
 import mx.edu.backendacademico.dto.AlumnoResponse;
 import mx.edu.backendacademico.dto.CrearAlumnoRequest;
+import mx.edu.backendacademico.exception.AlumnoNoEncontradoException;
 import mx.edu.backendacademico.service.AlumnoService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,8 +36,29 @@ public class AlumnoController {
     public List<AlumnoResponse> listar() { return service.listar().stream().map(AlumnoMapper::toResponse).toList(); }
 
     // GET consulta sin solicitar cambios de estado de negocio.
+    // DOCENTE y ADMIN ven cualquier registro; ALUMNO sólo el propio (usuario = matrícula).
     @GetMapping("/{id}")
-    public AlumnoResponse buscar(@PathVariable Long id) { return AlumnoMapper.toResponse(service.buscar(id)); }
+    public AlumnoResponse buscar(@PathVariable Long id, Authentication autenticacion) {
+        if (tieneAccesoCompleto(autenticacion)) {
+            return AlumnoMapper.toResponse(service.buscar(id));
+        }
+        Alumno alumno;
+        try {
+            alumno = service.buscar(id);
+        } catch (AlumnoNoEncontradoException ex) {
+            // Un alumno no distingue "no existe" de "no es tuyo": evita enumerar ids ajenos.
+            throw new AccessDeniedException("Sólo puedes consultar tu propio registro");
+        }
+        if (!alumno.matricula().equalsIgnoreCase(autenticacion.getName())) {
+            throw new AccessDeniedException("Sólo puedes consultar tu propio registro");
+        }
+        return AlumnoMapper.toResponse(alumno);
+    }
+
+    private static boolean tieneAccesoCompleto(Authentication autenticacion) {
+        return autenticacion.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+            .anyMatch(rol -> rol.equals("ROLE_DOCENTE") || rol.equals("ROLE_ADMIN"));
+    }
 
     // El servicio asigna identidad; ResponseEntity publica 201 y Location.
     @PostMapping

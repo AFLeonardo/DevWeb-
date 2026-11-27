@@ -77,6 +77,10 @@ paths:
         schema: {type: integer, format: int64}
     get:
       summary: Consulta un alumno
+      description: >-
+        DOCENTE y ADMIN consultan cualquier alumno. ALUMNO sólo consulta su propio registro:
+        aquel cuya matrícula coincide con su nombre de usuario (sin distinguir mayúsculas).
+        Para ALUMNO, un id ajeno o inexistente responde 403 ACCESO_DENEGADO, sin revelar si existe.
       responses:
         '200':
           description: Alumno encontrado
@@ -84,9 +88,19 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/Alumno'}
         '400': {$ref: '#/components/responses/Problema'}
-        '404': {$ref: '#/components/responses/Problema'}
+        '404':
+          description: No existe el alumno (sólo DOCENTE o ADMIN)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problema'}
         '401': {$ref: '#/components/responses/NoAutenticado'}
-        '403': {$ref: '#/components/responses/Prohibido'}
+        '403':
+          description: >-
+            Rol insuficiente (cadena de filtros, sin cuerpo) o ALUMNO que pide un registro
+            que no es suyo (problema con codigo ACCESO_DENEGADO)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problema'}
     put:
       summary: Sustituye nombre y correo del alumno
       parameters:

@@ -54,6 +54,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return inesperado(ex);
     }
 
+    // Sin este manejador, el @ExceptionHandler(Exception.class) convertiría la denegación en 500.
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    ProblemDetail accesoDenegado(org.springframework.security.access.AccessDeniedException ex) {
+        return problema(HttpStatus.FORBIDDEN, "ACCESO_DENEGADO", ex.getMessage());
+    }
+
     @ExceptionHandler(OperacionAcademicaException.class)
     ProblemDetail academica(OperacionAcademicaException ex) {
         var status = ex.getCodigo().equals("MATERIA_NO_ENCONTRADA")
